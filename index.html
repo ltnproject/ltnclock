@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock App - Ltn Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background 0.3s;
+        }
+
+        body.light {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .lang-picker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .lang-picker.hidden {
+            display: none;
+        }
+
+        .lang-options {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .lang-options h2 {
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 28px;
+        }
+
+        .lang-btn {
+            display: inline-block;
+            margin: 15px;
+            padding: 20px 50px;
+            font-size: 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .lang-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .lang-btn:active {
+            transform: scale(0.95);
+        }
+
+        .lang-btn.en {
+            background: #667eea;
+            color: white;
+        }
+
+        .lang-btn.th {
+            background: #764ba2;
+            color: white;
+        }
+
+        .clock-app {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 480px;
+            transition: background 0.3s;
+        }
+
+        body.light .clock-app {
+            background: #ffffff;
+        }
+
+        body.dark .clock-app {
+            background: #2d2d44;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .lang-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            transform: rotate(20deg) scale(1.1);
+        }
+
+        .clock-display {
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        body.light .clock-display {
+            background: #f8f9fa;
+        }
+
+        body.dark .clock-display {
+            background: #1a1a2e;
+        }
+
+        .time {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            transition: color 0.3s;
+        }
+
+        body.light .time {
+            color: #212529;
+        }
+
+        body.dark .time {
+            color: #ffffff;
+        }
+
+        .date, .day {
+            font-size: 20px;
+            margin: 8px 0;
+            transition: color 0.3s;
+        }
+
+        body.light .date, body.light .day {
+            color: #495057;
+        }
+
+        body.dark .date, body.dark .day {
+            color: #a0a0c0;
+        }
+
+        .analog-clock {
+            width: 280px;
+            height: 280px;
+            border: 10px solid;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        body.light .analog-clock {
+            border-color: #e9ecef;
+            background: #ffffff;
+        }
+
+        body.dark .analog-clock {
+            border-color: #3d3d5c;
+            background: #2d2d44;
+        }
+
+        .clock-number {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        body.light .clock-number {
+            color: #495057;
+        }
+
+        body.dark .clock-number {
+            color: #ffffff;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 70px;
+            margin-left: -4px;
+        }
+
+        body.light .hour-hand {
+            background: #212529;
+        }
+
+        body.dark .hour-hand {
+            background: #ffffff;
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 95px;
+            margin-left: -3px;
+        }
+
+        body.light .minute-hand {
+            background: #495057;
+        }
+
+        body.dark .minute-hand {
+            background: #e0e0e0;
+        }
+
+        .second-hand {
+            width: 3px;
+            height: 110px;
+            margin-left: -1.5px;
+            background: #667eea;
+        }
+
+        .center-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            background: #667eea;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        body.light .footer {
+            color: #6c757d;
+        }
+
+        body.dark .footer {
+            color: #a0a0c0;
+        }
+
+        .timer-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer-btn:hover {
+            background: #5568d3;
+            transform: scale(1.02);
+        }
+
+        .timer-btn:active {
+            transform: scale(0.98);
+        }
+
+        .timer-section {
+            margin-top: 20px;
+            border-radius: 15px;
+            padding: 25px;
+            transition: background 0.3s;
+        }
+
+        body.light .timer-section {
+            background: #f8f9fa;
+        }
+
+        body.dark .timer-section {
+            background: #1a1a2e;
+        }
+
+        .timer-section.hidden {
+            display: none;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            transition: color 0.3s;
+        }
+
+        body.light .timer-display {
+            color: #212529;
+        }
+
+        body.dark .timer-display {
+            color: #ffffff;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timer-controls input {
+            width: 70px;
+            padding: 12px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        body.light .timer-controls input {
+            background: #ffffff;
+            border-color: #dee2e6;
+            color: #212529;
+        }
+
+        body.dark .timer-controls input {
+            background: #2d2d44;
+            border-color: #3d3d5c;
+            color: #ffffff;
+        }
+
+        .timer-controls input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .timer-controls span {
+            font-size: 24px;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        body.light .timer-controls span {
+            color: #495057;
+        }
+
+        body.dark .timer-controls span {
+            color: #a0a0c0;
+        }
+
+        .timer-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timer-control-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .timer-control-btn.start {
+            background: #28a745;
+        }
+
+        .timer-control-btn.start:hover {
+            background: #218838;
+        }
+
+        .timer-control-btn.pause {
+            background: #ffc107;
+        }
+
+        .timer-control-btn.pause:hover {
+            background: #e0a800;
+        }
+
+        .timer-control-btn.reset {
+            background: #dc3545;
+        }
+
+        .timer-control-btn.reset:hover {
+            background: #c82333;
+        }
+
+        .timer-control-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 600px) {
+            .clock-app {
+                width: 90%;
+                padding: 25px;
+            }
+            .time {
+                font-size: 40px;
+            }
+            .analog-clock {
+                width: 220px;
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body class="light">
+    <div class="lang-picker" id="langPicker">
+        <div class="lang-options">
+            <h2>🌍 Choose Language / เลือกภาษา</h2>
+            <button class="lang-btn en" onclick="setLanguage('en')">🇬🇧 English</button>
+            <button class="lang-btn th" onclick="setLanguage('th')">🇹🇭 ไทย</button>
+        </div>
+    </div>
+
+    <div class="clock-app">
+        <div class="header">
+            <a href="https://ltnproject.github.io/dashboard/" class="back-btn">← Dashboard</a>
+            <div class="controls">
+                <button class="lang-toggle" onclick="showLangPicker()">🌐</button>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            </div>
+        </div>
+
+        <div class="clock-display">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Loading...</div>
+            <div class="day" id="day">Loading...</div>
+        </div>
+        
+        <div class="analog-clock">
+            <div class="hand hour-hand" id="hourHand"></div>
+            <div class="hand minute-hand" id="minuteHand"></div>
+            <div class="hand second-hand" id="secondHand"></div>
+            <div class="center-dot"></div>
+        </div>
+
+        <button class="timer-btn" onclick="toggleTimer()">⏱️ <span id="timerBtnText">Timer</span></button>
+
+        <div class="timer-section hidden" id="timerSection">
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-controls">
+                <input type="number" id="hours" placeholder="HH" min="0" max="23" value="0">
+                <span>:</span>
+                <input type="number" id="minutes" placeholder="MM" min="0" max="59" value="0">
+                <span>:</span>
+                <input type="number" id="seconds" placeholder="SS" min="0" max="59" value="0">
+            </div>
+            <div class="timer-buttons">
+                <button class="timer-control-btn start" onclick="startTimer()">▶️ <span id="startText">Start</span></button>
+                <button class="timer-control-btn pause" onclick="pauseTimer()">⏸️ <span id="pauseText">Pause</span></button>
+                <button class="timer-control-btn reset" onclick="resetTimer()">🔄 <span id="resetText">Reset</span></button>
+            </div>
+        </div>
+        
+        <div class="footer">© 2025 Ltn Project by Jacob</div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                timer: 'Timer',
+                start: 'Start',
+                pause: 'Pause',
+                reset: 'Reset'
+            },
+            th: {
+                days: ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'],
+                months: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
+                timer: 'ตั้งเวลา',
+                start: 'เริ่ม',
+                pause: 'หยุด',
+                reset: 'รีเซ็ต'
+            }
+        };
+
+        let currentLang = localStorage.getItem('clockLang') || null;
+        let isDarkMode = localStorage.getItem('clockTheme') === 'dark';
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let isTimerRunning = false;
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('clockLang', lang);
+            document.getElementById('langPicker').classList.add('hidden');
+            updateTranslations();
+            updateClock();
+        }
+
+        function updateTranslations() {
+            document.getElementById('timerBtnText').textContent = translations[currentLang].timer;
+            document.getElementById('startText').textContent = translations[currentLang].start;
+            document.getElementById('pauseText').textContent = translations[currentLang].pause;
+            document.getElementById('resetText').textContent = translations[currentLang].reset;
+        }
+
+        function showLangPicker() {
+            document.getElementById('langPicker').classList.remove('hidden');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const toggle = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('light')) {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                toggle.textContent = '☀️';
+                localStorage.setItem('clockTheme', 'dark');
+            } else {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                toggle.textContent = '🌙';
+                localStorage.setItem('clockTheme', 'light');
+            }
+        }
+
+        function updateClock() {
+            if (!currentLang) return;
+
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+
+            const day = now.getDate();
+            const month = translations[currentLang].months[now.getMonth()];
+            const year = currentLang === 'th' ? now.getFullYear() + 543 : now.getFullYear();
+            document.getElementById('date').textContent = `${day} ${month} ${year}`;
+
+            const dayName = translations[currentLang].days[now.getDay()];
+            document.getElementById('day').textContent = dayName;
+
+            const h = now.getHours() % 12;
+            const m = now.getMinutes();
+            const s = now.getSeconds();
+
+            const hourDeg = (h * 30) + (m * 0.5);
+            const minuteDeg = m * 6;
+            const secondDeg = s * 6;
+
+            document.getElementById('hourHand').style.transform = `rotate(${hourDeg}deg)`;
+            document.getElementById('minuteHand').style.transform = `rotate(${minuteDeg}deg)`;
+            document.getElementById('secondHand').style.transform = `rotate(${secondDeg}deg)`;
+        }
+
+        function toggleTimer() {
+            const timerSection = document.getElementById('timerSection');
+            timerSection.classList.toggle('hidden');
+        }
+
+        function startTimer() {
+            if (isTimerRunning) return;
+
+            if (timerSeconds === 0) {
+                const hours = parseInt(document.getElementById('hours').value) || 0;
+                const minutes = parseInt(document.getElementById('minutes').value) || 0;
+                const seconds = parseInt(document.getElementById('seconds').value) || 0;
+                timerSeconds = hours * 3600 + minutes * 60 + seconds;
+            }
+
+            if (timerSeconds === 0) return;
+
+            isTimerRunning = true;
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    pauseTimer();
+                    alert(currentLang === 'en' ? 'Timer finished!' : 'เวลาหมดแล้ว!');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isTimerRunning = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 0;
+            document.getElementById('hours').value = 0;
+            document.getElementById('minutes').value = 0;
+            document.getElementById('seconds').value = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timerSeconds / 3600);
+            const minutes = Math.floor((timerSeconds % 3600) / 60);
+            const seconds = timerSeconds % 60;
+            
+            document.getElementById('timerDisplay').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        if (isDarkMode) {
+            document.body.classList.remove('light');
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+
+        if (currentLang) {
+            document.getElementById('langPicker').classList.add('hidden');
+            updateTranslations();
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+    </script>
+</body>
+</html>
